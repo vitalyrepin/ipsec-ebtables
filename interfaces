@@ -1,0 +1,27 @@
+auto br0
+
+iface eth0 inet manual
+up ip link set eth0 up
+up ip link set dev eth0 promisc on
+
+down ip link set eth0 promisc off
+down ip link set eth0 down
+
+# The local network bridge
+iface br0 inet static
+  bridge_ports eth0
+  # disable Spanning Tree Protocol
+  bridge_stp off
+  # no delay before a port becomes available
+  bridge_waitport 0
+  # no forwarding delay
+  bridge_fd 0
+  address <IP address of your host>
+  netmask <netmask of your host>
+  gateway <default gateway>
+  metric 1
+  post-up ip link set dev br0 promisc on
+  # See an article! Not the very best approach!  use ebtables-save/ebtables-restore instead!
+  post-up /usr/local/bin/ebtables-filter.sh br0
+  post-down ebtables -F
+
